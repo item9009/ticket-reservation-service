@@ -52,4 +52,20 @@ public class OutboxEventPublisher {
             }
         }
     }
+
+    // 1분마다 FAILED 이벤트 재시도
+    @Scheduled(fixedDelay = 60000)
+    @Transactional
+    public void retryFailedEvents() {
+        List<OutboxEvent> failedEvents =
+                outboxEventRepository.findTop100ByStatusOrderByCreatedAtAsc(OutboxStatus.FAILED);
+
+        if (failedEvents.isEmpty()) return;
+
+        log.info("FAILED 이벤트 재시도: {}건", failedEvents.size());
+
+        // PENDING으로 되돌려서 기존 발행 로직이 처리하도록
+        failedEvents.forEach(event -> event.markPending());
+        outboxEventRepository.saveAll(failedEvents);
+    }
 }
