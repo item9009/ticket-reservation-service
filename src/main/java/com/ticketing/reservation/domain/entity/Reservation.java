@@ -65,7 +65,9 @@ public class Reservation {
     }
 
     public void confirm() {
-        validateStatus(ReservationStatus.PENDING);
+        if (this.status != ReservationStatus.PENDING && this.status != ReservationStatus.EXPIRED) {
+            throw new IllegalStateException("잘못된 상태 전이: " + this.status + " -> CONFIRMED");
+        }
         this.status = ReservationStatus.CONFIRMED;
     }
 
