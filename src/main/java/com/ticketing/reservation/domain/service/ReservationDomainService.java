@@ -4,6 +4,7 @@ import com.ticketing.reservation.application.dto.EventSeatInfo;
 import com.ticketing.reservation.domain.entity.Reservation;
 import com.ticketing.reservation.domain.entity.ReservationSeat;
 import com.ticketing.reservation.domain.repository.ReservationRepository;
+import com.ticketing.reservation.domain.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,17 +17,21 @@ import java.util.List;
 public class ReservationDomainService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationSeatRepository reservationSeatRepository; // 추가
 
     public Reservation createReservation(Long userId, Long eventId,
                                           List<EventSeatInfo> seatInfos) {
-        // 1. 좌석 상태 검증
-        seatInfos.forEach(seat -> {
-            if (!seat.isAvailable()) {
-                throw new IllegalStateException(
-                        "이미 선점된 좌석입니다: eventSeatId=" + seat.getEventSeatId()
-                );
-            }
-        });
+        // 1. 이미 예매된 좌석인지 DB에서 확인
+        List<Long> eventSeatIds = seatInfos.stream()
+                .map(EventSeatInfo::getEventSeatId)
+                .toList();
+
+        boolean alreadyReserved = reservationSeatRepository
+                .existsByEventSeatIdIn(eventSeatIds);
+
+        if (alreadyReserved) {
+            throw new IllegalStateException("이미 예매된 좌석입니다.");
+        }
 
         // 2. 총 금액 계산
         int totalAmount = seatInfos.stream()
