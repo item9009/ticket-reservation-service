@@ -52,6 +52,15 @@ grpc:
       address: 'static://localhost:9090'  # 같은 서비스 내 gRPC 호출
       negotiation-type: plaintext
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
 logging:
   level:
     com.ticketing: DEBUG
