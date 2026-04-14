@@ -41,6 +41,20 @@ public class ReservationFacade {
                 request.getEventId(), request.getEventSeatIds()
         );
 
+        if (seatInfos.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "유효하지 않은 이벤트 또는 좌석입니다. eventId=" + request.getEventId()
+                            + ", seatIds=" + request.getEventSeatIds()
+            );
+        }
+
+        if (seatInfos.size() != request.getEventSeatIds().size()) {
+            throw new IllegalArgumentException(
+                    "일부 좌석이 유효하지 않습니다. 요청=" + request.getEventSeatIds().size()
+                            + "석, 확인=" + seatInfos.size() + "석"
+            );
+        }
+
         // 2. 도메인 서비스에서 예매 생성 (상태: PENDING)
         Reservation reservation = reservationDomainService.createReservation(
                 request.getUserId(), request.getEventId(), seatInfos
