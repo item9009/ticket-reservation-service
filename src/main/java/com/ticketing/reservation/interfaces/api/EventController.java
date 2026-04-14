@@ -34,9 +34,9 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}/seats")
-    @Operation(summary = "이벤트 좌석 조회", description = "특정 이벤트의 예매 가능한 좌석 목록을 반환합니다. eventSeatId를 예매 요청의 eventSeatIds에 사용하세요.")
-    public ResponseEntity<List<EventSeatResponse>> getAvailableSeats(@PathVariable Long eventId) {
-        List<EventSeatResponse> seats = eventSeatRepository.findByEventIdAndStatus(eventId, "AVAILABLE").stream()
+    @Operation(summary = "이벤트 좌석 조회", description = "특정 이벤트의 전체 좌석 목록과 예매 상태를 반환합니다. AVAILABLE 좌석의 eventSeatId를 예매 요청의 eventSeatIds에 사용하세요.")
+    public ResponseEntity<List<EventSeatResponse>> getSeats(@PathVariable Long eventId) {
+        List<EventSeatResponse> seats = eventSeatRepository.findByEventId(eventId).stream()
                 .map(EventSeatResponse::from)
                 .toList();
         return ResponseEntity.ok(seats);

@@ -10,4 +10,6 @@ public interface EventSeatRepository extends JpaRepository<EventSeat, Long> {
     List<EventSeat> findByEventIdAndIdIn(Long eventId, List<Long> ids);
 
     List<EventSeat> findByEventIdAndStatus(Long eventId, String status);
+
+    List<EventSeat> findByEventId(Long eventId);
 }

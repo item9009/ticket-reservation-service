@@ -19,6 +19,9 @@ public class EventSeat {
     private Long seatId;
 
     @Column(nullable = false)
+    private String grade;
+
+    @Column(nullable = false)
     private int price;
 
     @Column(nullable = false)
