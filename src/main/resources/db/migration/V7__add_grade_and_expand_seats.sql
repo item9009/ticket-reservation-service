@@ -72,5 +72,5 @@ FROM seats s
          JOIN sections sec ON s.section_id = sec.id
          JOIN events e ON e.title = '2026 봄 콘서트'
          LEFT JOIN event_seats existing ON existing.seat_id = s.id AND existing.event_id = e.id
-WHERE sec.venue_id = (SELECT id FROM venues WHERE name = '올림픽공원 체조경기장')
+WHERE sec.venue_id IN (SELECT id FROM venues WHERE name = '올림픽공원 체조경기장')
   AND existing.id IS NULL;

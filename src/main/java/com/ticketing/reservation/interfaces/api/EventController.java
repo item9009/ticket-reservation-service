@@ -27,7 +27,7 @@ public class EventController {
     @GetMapping
     @Operation(summary = "이벤트 목록 조회", description = "예매 가능한 이벤트 목록을 반환합니다.")
     public ResponseEntity<List<EventResponse>> getEvents() {
-        List<EventResponse> events = eventRepository.findByStatus("SCHEDULED").stream()
+        List<EventResponse> events = eventRepository.findEventSummariesByStatus("SCHEDULED").stream()
                 .map(EventResponse::from)
                 .toList();
         return ResponseEntity.ok(events);
