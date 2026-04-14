@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class EventSeat {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -33,6 +34,16 @@ public class EventSeat {
      * Event Service의 Kafka 이벤트로 읽기 모델을 생성할 때 사용.
      * id는 Event Service가 발행한 eventSeatId를 그대로 사용한다.
      */
+    public static EventSeat createNew(Long eventId, Long seatId, String grade, int price) {
+        EventSeat seat = new EventSeat();
+        seat.eventId = eventId;
+        seat.seatId = seatId;
+        seat.grade = grade;
+        seat.price = price;
+        seat.status = "AVAILABLE";
+        return seat;
+    }
+
     public static EventSeat create(Long id, Long eventId, Long seatId, String grade, int price, String status) {
         EventSeat seat = new EventSeat();
         seat.id = id;
