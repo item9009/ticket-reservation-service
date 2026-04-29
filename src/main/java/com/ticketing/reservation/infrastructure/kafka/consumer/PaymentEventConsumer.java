@@ -1,10 +1,14 @@
 package com.ticketing.reservation.infrastructure.kafka.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ticketing.reservation.domain.entity.EventSeat;
 import com.ticketing.reservation.domain.entity.Reservation;
 import com.ticketing.reservation.domain.entity.Ticket;
+import com.ticketing.reservation.domain.repository.EventSeatRepository;
 import com.ticketing.reservation.domain.repository.ReservationRepository;
 import com.ticketing.reservation.domain.repository.TicketRepository;
+
+import java.util.List;
 import com.ticketing.reservation.infrastructure.kafka.dto.PaymentCompletedEvent;
 import com.ticketing.reservation.infrastructure.kafka.dto.PaymentFailedEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class PaymentEventConsumer {
 
     private final ReservationRepository reservationRepository;
+    private final EventSeatRepository eventSeatRepository;
     private final TicketRepository ticketRepository;
     private final ObjectMapper objectMapper;
 
@@ -45,6 +50,14 @@ public class PaymentEventConsumer {
                             "예매를 찾을 수 없습니다: " + event.getReservationId()
                     ));
             reservation.confirm();
+
+            // event_seats 상태 SOLD로 업데이트
+            List<Long> eventSeatIds = reservation.getSeats().stream()
+                    .map(seat -> seat.getEventSeatId())
+                    .toList();
+            List<EventSeat> eventSeats = eventSeatRepository.findAllById(eventSeatIds);
+            eventSeats.forEach(es -> es.updateStatus("SOLD"));
+            eventSeatRepository.saveAll(eventSeats);
 
             // 티켓 발급
             reservation.getSeats().forEach(seat -> {
@@ -81,6 +94,14 @@ public class PaymentEventConsumer {
                     .findById(event.getReservationId())
                     .orElseThrow();
             reservation.cancel();
+
+            // event_seats 상태 AVAILABLE로 복구
+            List<Long> eventSeatIds = reservation.getSeats().stream()
+                    .map(seat -> seat.getEventSeatId())
+                    .toList();
+            List<EventSeat> eventSeats = eventSeatRepository.findAllById(eventSeatIds);
+            eventSeats.forEach(es -> es.updateStatus("AVAILABLE"));
+            eventSeatRepository.saveAll(eventSeats);
 
         } catch (Exception e) {
             log.error("결제 실패 이벤트 처리 실패: {}", e.getMessage(), e);
